@@ -6,6 +6,25 @@
 <meta name="description" content="Farmsense Frost Dates API Demonstration">
 <meta name="author" content="mark@farmsense.net">
 
+</head>
+<body>
+
+<header>
+<h1>FarmSense Frost Date Demo</h1>
+</header>
+<section>
+<h2 id="stations">Choose your nearest Station</h2>
+<div id="station_list"></div>
+</section>
+<section>
+<h2 id="fall_station_name"></h2>
+<div id="fall_frost_data"></div>
+</section>
+<section>
+<h2 id="spring_station_name"></h2>
+<div id="spring_frost_data"></div>
+</section>
+
 <script>
 // <![CDATA[
 
@@ -103,10 +122,10 @@ var frostdatesObj = {
 		html+= '</table>';
 			
 		if(response[0].season_id==1){
-			document.getElementById('spring_station_name').innerHTML = this.station + ': Spring Probability of Frost';
+			document.getElementById('spring_station_name').innerHTML = this.station + ': Spring Frost Probability';
 			document.getElementById('spring_frost_data').innerHTML = html;
 		} else {
-			document.getElementById('fall_station_name').innerHTML = this.station + ': Fall Probability of Frost';
+			document.getElementById('fall_station_name').innerHTML = this.station + ': Fall Frost Probability';
 			document.getElementById('fall_frost_data').innerHTML = html;
 		}
 	
@@ -153,83 +172,21 @@ var frostdatesObj = {
 	}
 }
 
-var locationObj = {
-	// get lat lon from ip using host.info service - uses proxy for same domain 
-	getCoords : function() {
-		var url = 'http://www.farmsense.net/demos/proxies/proxy.php?proxy=iplatlon';
-		var method = 'GET';
-		var params = null;
-	
-		this.requestUrl(url, method, params, function(data) {
-			var d = eval('('+data+')');
-			
-			frostdatesObj.lat = d[0];
-			frostdatesObj.lon = d[1];
-	
-			frostdatesObj.getStations();
-		});
-	},
-	
-	requestUrl : function(url, method, params, callback) {
-		if(method == 'GET' || method == 'POST'){
-	
-			var request = window.ActiveXObject ? new ActiveXObject('Microsoft.XMLHTTP') : new XMLHttpRequest;
-
-			request.onreadystatechange = function() {
-				if (request.readyState == 4) {
-					request.onreadystatechange = this.doNothing;
-					callback(request.responseText, request.status);
-				}
-			};
-		
-			request.open(method, url, true);
-	
-			if(method == 'POST') {
-				//Send the proper header information along with the request
-				request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-				request.setRequestHeader("Content-length", params.length);
-				request.setRequestHeader("Connection", "close");
-			} else if(method == 'GET'){
-				params = null;
-			}
-	
-			request.send(params);
-		
-		} else {
-			alert ("Method must be 'GET' or 'POST'");
-		}
-	},
-
-
-	doNothing : function() {}
+var showPosition = function(position){
+	frostdatesObj.lat = position.coords.latitude;
+	frostdatesObj.lon = position.coords.longitude;
+	frostdatesObj.getStations();
 }
 
-var init = function(){
-	locationObj.getCoords();
-};
 
-window.onload = init;
+
+if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition);
+} else {
+	alert('Your browser doesn\'t support HTML5 Geolocation');
+}
 
 // ]]>
 </script>
-
-</head>
-<body>
-
-<header>
-<h1>FarmSense Frost Date Demo</h1>
-</header>
-<section>
-<h2 id="stations">Choose your nearest Station</h2>
-<div id="station_list"></div>
-</section>
-<section>
-<h2 id="fall_station_name"></h2>
-<div id="fall_frost_data"></div>
-</section>
-<section>
-<h2 id="spring_station_name"></h2>
-<div id="spring_frost_data"></div>
-</section>
 </body>
 </html>
